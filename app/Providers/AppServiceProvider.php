@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         // Auto-register all module providers like UserServiceProvider, ProductServiceProvider, etc.
         foreach (glob(app_path('Modules/*/Providers/*ServiceProvider.php')) as $providerPath) {

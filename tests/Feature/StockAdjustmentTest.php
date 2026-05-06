@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Modules\Product\Events\StockAdjusted;
+use App\Modules\Product\Events\StockBelowThreshold;
 use App\Modules\Product\Models\Product;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -116,7 +116,7 @@ class StockAdjustmentTest extends TestCase
             'reason' => 'restock',
         ]);
 
-        Event::assertDispatched(StockAdjusted::class, function ($event) use ($product) {
+        Event::assertDispatched(StockBelowThreshold::class, function ($event) use ($product) {
             return $event->product->id === $product->id &&
                    $event->adjustmentQuantity === 5 &&
                    $event->previousQuantity === 10 &&
@@ -141,7 +141,7 @@ class StockAdjustmentTest extends TestCase
         ]);
 
         // Verify event was dispatched
-        Event::assertDispatched(StockAdjusted::class);
+        Event::assertDispatched(StockBelowThreshold::class);
     }
 
     /**
@@ -158,7 +158,7 @@ class StockAdjustmentTest extends TestCase
             'reason' => 'inventory_correction',
         ]);
 
-        Event::assertDispatched(StockAdjusted::class, function ($event) {
+        Event::assertDispatched(StockBelowThreshold::class, function ($event) {
             return $event->reason === 'inventory_correction';
         });
     }
@@ -176,7 +176,7 @@ class StockAdjustmentTest extends TestCase
             'quantity' => 5,
         ]);
 
-        Event::assertDispatched(StockAdjusted::class, function ($event) {
+        Event::assertDispatched(StockBelowThreshold::class, function ($event) {
             return $event->reason === 'manual_adjustment';
         });
     }
