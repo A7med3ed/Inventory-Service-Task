@@ -6,16 +6,8 @@ use Exception;
 
 class NotFoundException extends Exception
 {
-    public function __construct(string $message = "Resource not found", int $code = 404)
+    public function __construct(string $resource = 'Resource', string $id = '')
     {
-        parent::__construct($message, $code);
-    }
-
-    public function render()
-    {
-        return response()->json([
-            'error' => true,
-            'message' => $this->getMessage(),
-        ], $this->getCode());
+        parent::__construct("{$resource} not found" . ($id ? ": {$id}" : ''));
     }
 }

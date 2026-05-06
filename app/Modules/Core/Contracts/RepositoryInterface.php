@@ -8,17 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 interface RepositoryInterface
 {
-    public function all(): Collection;
-    
     public function paginate(int $perPage = 15): LengthAwarePaginator;
-    
-    public function find(int $id): ?Model;
-    
+    public function findById(string $id): ?Model;
     public function create(array $data): Model;
-    
-    public function update(int $id, array $data): bool;
-    
-    public function delete(int $id): bool;
-    
-    public function findWhere(array $criteria): Collection;
+    public function update(Model $model, array $data): Model;
+    public function delete(Model $model): void;
+    public function all(): Collection;
 }

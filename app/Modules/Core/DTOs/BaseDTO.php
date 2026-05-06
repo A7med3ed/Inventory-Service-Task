@@ -4,18 +4,11 @@ namespace App\Modules\Core\DTOs;
 
 abstract class BaseDTO
 {
-    abstract public function toArray(): array;
-
-    abstract public static function fromArray(array $data): self;
-
-    public function toJson(): string
+    public function toArray(): array
     {
-        return json_encode($this->toArray());
-    }
-
-    public static function fromJson(string $json): self
-    {
-        $data = json_decode($json, true);
-        return fromArray($data);
+        return array_filter(
+            get_object_vars($this),
+            fn ($value) => $value !== null
+        );
     }
 }

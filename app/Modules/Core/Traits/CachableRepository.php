@@ -6,77 +6,21 @@ use Illuminate\Support\Facades\Cache;
 
 trait CachableRepository
 {
-    /**
-     * Cache key prefix for the repository
-     */
-    protected string $cachePrefix = 'repository';
+    protected int $cacheTtl = 300;
 
-    /**
-     * Cache duration in minutes
-     */
-    protected int $cacheDuration = 60;
-
-    /**
-     * Get cache key
-     */
-    protected function getCacheKey(string $key): string
+    protected function getCacheTag(): string
     {
-        return "{$this->cachePrefix}:{$key}";
+        return static::class;
     }
 
-    /**
-     * Get value from cache or execute callback
-     */
-    protected function remember(string $key, callable $callback)
+    protected function remember(string $key, callable $callback): mixed
     {
-        return Cache::remember(
-            $this->getCacheKey($key),
-            now()->addMinutes($this->cacheDuration),
-            $callback
-        );
+        return Cache::tags([$this->getCacheTag()])
+            ->remember($key, $this->cacheTtl, $callback);
     }
 
-    /**
-     * Get value from cache
-     */
-    protected function get(string $key)
+    protected function flushCache(): void
     {
-        return Cache::get($this->getCacheKey($key));
-    }
-
-    /**
-     * Put value in cache
-     */
-    protected function put(string $key, $value, int $minutes = null): void
-    {
-        Cache::put(
-            $this->getCacheKey($key),
-            $value,
-            now()->addMinutes($minutes ?? $this->cacheDuration)
-        );
-    }
-
-    /**
-     * Forget cache key
-     */
-    protected function forget(string $key): void
-    {
-        Cache::forget($this->getCacheKey($key));
-    }
-
-    /**
-     * Forget multiple cache keys by pattern
-     */
-    protected function forgetPattern(string $pattern): void
-    {
-        Cache::tags([$pattern])->flush();
-    }
-
-    /**
-     * Clear all cache for this repository
-     */
-    protected function clearCache(): void
-    {
-        Cache::tags([$this->cachePrefix])->flush();
+        Cache::tags([$this->getCacheTag()])->flush();
     }
 }

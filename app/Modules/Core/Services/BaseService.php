@@ -5,32 +5,34 @@ namespace App\Modules\Core\Services;
 use App\Modules\Core\Contracts\RepositoryInterface;
 use App\Modules\Core\Contracts\ServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseService implements ServiceInterface
 {
-    public function __construct(
-        protected RepositoryInterface $repository
-    ) {}
+    public function __construct(protected RepositoryInterface $repository) {}
 
-    public function getAll(): Collection
-    {
-        return $this->repository->all();
-    }
-
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function list(int $perPage = 15): LengthAwarePaginator
     {
         return $this->repository->paginate($perPage);
     }
 
-    public function getById(int $id): ?Model
+    public function findById(string $id): ?Model
     {
-        return $this->repository->find($id);
+        return $this->repository->findById($id);
     }
 
-    public function search(array $criteria): Collection
+    public function create(array $data): Model
     {
-        return $this->repository->findWhere($criteria);
+        return $this->repository->create($data);
+    }
+
+    public function update(Model $model, array $data): Model
+    {
+        return $this->repository->update($model, $data);
+    }
+
+    public function delete(Model $model): void
+    {
+        $this->repository->delete($model);
     }
 }
