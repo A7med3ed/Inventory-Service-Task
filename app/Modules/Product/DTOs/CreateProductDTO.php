@@ -2,53 +2,46 @@
 
 namespace App\Modules\Product\DTOs;
 
-readonly class CreateProductDTO
+use App\Modules\Core\DTOs\BaseDTO;
+use App\Modules\Product\Enums\ProductStatus;
+
+class CreateProductDTO extends BaseDTO
 {
     public function __construct(
-        public string  $name,
-        public string  $slug,
-        public string  $sku,
-        public string  $description,
-        public float   $price,
-        public int     $stock_quantity,
-        public int     $low_stock_threshold = 10,
-        public string  $status = 'active',
-        public ?int    $category_id = null,
-        public ?string $image_url = null,
-        public bool    $is_active = true
+        public readonly string        $sku,
+        public readonly string        $name,
+        public readonly float         $price,
+        public readonly ?string       $description         = null,
+        public readonly int           $stock_quantity      = 0,
+        public readonly int           $low_stock_threshold = 10,
+        public readonly ProductStatus $status              = ProductStatus::Active,
     ) {}
-
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'sku' => $this->sku,
-            'description' => $this->description,
-            'price' => $this->price,
-            'stock_quantity' => $this->stock_quantity,
-            'low_stock_threshold' => $this->low_stock_threshold,
-            'status' => $this->status,
-            'category_id' => $this->category_id,
-            'image_url' => $this->image_url,
-            'is_active' => $this->is_active,
-        ];
-    }
 
     public static function fromArray(array $data): self
     {
         return new self(
-            name: $data['name'],
-            slug: $data['slug'],
-            sku: $data['sku'],
-            description: $data['description'],
-            price: (float) $data['price'],
-            stock_quantity: (int) $data['stock_quantity'],
-            low_stock_threshold: isset($data['low_stock_threshold']) ? (int) $data['low_stock_threshold'] : 10,
-            status: $data['status'] ?? 'active',
-            category_id: isset($data['category_id']) ? (int) $data['category_id'] : null,
-            image_url: $data['image_url'] ?? null,
-            is_active: $data['is_active'] ?? true
+            sku:                 $data['sku'],
+            name:                $data['name'],
+            price:               (float) $data['price'],
+            description:         $data['description'] ?? null,
+            stock_quantity:      (int) ($data['stock_quantity'] ?? 0),
+            low_stock_threshold: (int) ($data['low_stock_threshold'] ?? 10),
+            status:              isset($data['status'])
+                ? ProductStatus::from($data['status'])
+                : ProductStatus::Active,
         );
+    }
+
+    public function toArray(): array
+    {
+        return array_filter([
+            'sku'                 => $this->sku,
+            'name'                => $this->name,
+            'price'               => $this->price,
+            'description'         => $this->description,
+            'stock_quantity'      => $this->stock_quantity,
+            'low_stock_threshold' => $this->low_stock_threshold,
+            'status'              => $this->status->value,
+        ], fn ($v) => $v !== null);
     }
 }

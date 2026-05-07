@@ -23,10 +23,7 @@ class ProductServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
-
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
-        });
+        
     }
 
 

@@ -2,61 +2,38 @@
 
 namespace App\Modules\Product\Services;
 
-use App\Modules\Product\Events\StockBelowThreshold;
-use App\Modules\Product\Contracts\ProductServiceInterface;
-use App\Modules\Product\Models\Product;
+use App\Modules\Core\Services\BaseService;
 use App\Modules\Product\Contracts\ProductRepositoryInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Modules\Product\Contracts\ProductServiceInterface;
+use App\Modules\Product\DTOs\AdjustStockDTO;
+use App\Modules\Product\DTOs\CreateProductDTO;
+use App\Modules\Product\DTOs\UpdateProductDTO;
+use App\Modules\Product\Events\StockBelowThreshold;
+use App\Modules\Product\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 
-class ProductService implements ProductServiceInterface
+class ProductService extends BaseService implements ProductServiceInterface
 {
-    private const CACHE_TTL = 300;
-    private const CACHE_TAG = 'products';
-
-    public function __construct(
-        private readonly ProductRepositoryInterface $repository,
-    ) {}
-
-    public function list(int $perPage = 15): LengthAwarePaginator
+    public function __construct(ProductRepositoryInterface $repository)
     {
-        return Cache::tags([self::CACHE_TAG])->remember(
-            "products:list:{$perPage}",
-            self::CACHE_TTL,
-            fn () => $this->repository->paginate($perPage)
-        );
+        parent::__construct($repository);
+
     }
 
-    public function findById(string $id): ?Product
+    public function createFromDTO(CreateProductDTO $dto): Product
     {
-        return $this->repository->findById($id);
+        return $this->repository->create($dto->toArray());
     }
 
-    public function create(array $data): Product
+    public function updateFromDTO(Product $product, UpdateProductDTO $dto): Product
     {
-        $product = $this->repository->create($data);
-        $this->flushCache();
-        return $product;
+        return $this->repository->update($product, $dto->toArray());
     }
 
-    public function update(Product $product, array $data): Product
+    public function adjustStock(Product $product, AdjustStockDTO $dto): Product
     {
-        $product = $this->repository->update($product, $data);
-        $this->flushCache();
-        return $product;
-    }
-
-    public function delete(Product $product): void
-    {
-        $this->repository->softDelete($product);
-        $this->flushCache();
-    }
-
-    public function adjustStock(Product $product, int $delta): Product
-    {
-        $product = $this->repository->adjustStock($product, $delta);
-        $this->flushCache();
+        $repository = $this->repository;
+        $product    = $repository->adjustStock($product, $dto->delta);
 
         if ($product->isLowStock()) {
             event(new StockBelowThreshold($product));
@@ -67,11 +44,7 @@ class ProductService implements ProductServiceInterface
 
     public function lowStock(): Collection
     {
-        return $this->repository->lowStock();
-    }
-
-    private function flushCache(): void
-    {
-        Cache::tags([self::CACHE_TAG])->flush();
+        $repository = $this->repository;
+        return $repository->lowStock();
     }
 }

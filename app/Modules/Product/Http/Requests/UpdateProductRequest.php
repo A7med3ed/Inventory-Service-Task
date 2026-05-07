@@ -2,8 +2,9 @@
 
 namespace App\Modules\Product\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Modules\Product\DTOs\UpdateProductDTO;
 use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateProductRequest extends FormRequest
@@ -12,8 +13,10 @@ class UpdateProductRequest extends FormRequest
 
     public function rules(): array
     {
+        $productId = $this->route('product')->id;
+
         return [
-            'sku'                 => ['sometimes', 'string', 'max:100', 'unique:products,sku,' . $this->route('product')->id],
+            'sku'                 => ['sometimes', 'string', 'max:100', "unique:products,sku,{$productId}"],
             'name'                => ['sometimes', 'string', 'max:255'],
             'description'         => ['nullable', 'string'],
             'price'               => ['sometimes', 'numeric', 'min:0'],
@@ -21,5 +24,10 @@ class UpdateProductRequest extends FormRequest
             'low_stock_threshold' => ['sometimes', 'integer', 'min:0'],
             'status'              => ['sometimes', new Enum(ProductStatus::class)],
         ];
+    }
+
+    public function toDTO(): UpdateProductDTO
+    {
+        return UpdateProductDTO::fromArray($this->validated());
     }
 }

@@ -2,16 +2,17 @@
 
 namespace App\Modules\Product\Models;
 
+use App\Modules\Core\Traits\HasUuid;
+use App\Modules\Product\Database\Factories\ProductFactory;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuid, SoftDeletes;
 
     protected $fillable = [
         'sku',
@@ -29,6 +30,11 @@ class Product extends Model
         'low_stock_threshold' => 'integer',
         'status'              => ProductStatus::class,
     ];
+
+    protected static function newFactory(): ProductFactory
+    {
+        return ProductFactory::new();
+    }
 
     public function scopeLowStock(Builder $query): Builder
     {

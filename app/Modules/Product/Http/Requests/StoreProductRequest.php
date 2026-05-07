@@ -2,6 +2,7 @@
 
 namespace App\Modules\Product\Http\Requests;
 
+use App\Modules\Product\DTOs\CreateProductDTO;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -21,5 +22,10 @@ class StoreProductRequest extends FormRequest
             'low_stock_threshold' => ['sometimes', 'integer', 'min:0'],
             'status'              => ['sometimes', new Enum(ProductStatus::class)],
         ];
+    }
+
+    public function toDTO(): CreateProductDTO
+    {
+        return CreateProductDTO::fromArray($this->validated());
     }
 }

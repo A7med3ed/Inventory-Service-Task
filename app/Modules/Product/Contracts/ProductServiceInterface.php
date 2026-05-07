@@ -2,23 +2,17 @@
 
 namespace App\Modules\Product\Contracts;
 
+use App\Modules\Core\Contracts\ServiceInterface;
+use App\Modules\Product\DTOs\AdjustStockDTO;
+use App\Modules\Product\DTOs\CreateProductDTO;
+use App\Modules\Product\DTOs\UpdateProductDTO;
 use App\Modules\Product\Models\Product;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
-interface ProductServiceInterface
+interface ProductServiceInterface extends ServiceInterface
 {
-    public function list(int $perPage = 15): LengthAwarePaginator;
-
-    public function findById(string $id): ?Product;
-
-    public function create(array $data): Product;
-
-    public function update(Product $product, array $data): Product;
-
-    public function delete(Product $product): void;
-
-    public function adjustStock(Product $product, int $delta): Product;
-
+    public function createFromDTO(CreateProductDTO $dto): Product;
+    public function updateFromDTO(Product $product, UpdateProductDTO $dto): Product;
+    public function adjustStock(Product $product, AdjustStockDTO $dto): Product;
     public function lowStock(): Collection;
 }
