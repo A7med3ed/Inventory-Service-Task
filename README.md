@@ -364,7 +364,7 @@ http://localhost/api/documentation
 ## Swagger Json file of Routes (can import in Postman)
 
 ```txt
-nhttp://localhost/api/docs
+http://localhost/api/docs
 ```
 
 
