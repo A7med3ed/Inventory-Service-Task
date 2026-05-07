@@ -9,6 +9,7 @@ use App\Modules\Product\Services\ProductService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class ProductServiceProvider extends ServiceProvider
@@ -23,7 +24,8 @@ class ProductServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
-        
+        Route::middleware('api')->prefix('api')->group(__DIR__ . '/../Routes/api.php');
+
     }
 
 

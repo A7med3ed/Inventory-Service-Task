@@ -8,6 +8,7 @@ use App\Modules\Product\Contracts\ProductRepositoryInterface;
 use App\Modules\Product\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository implements ProductRepositoryInterface
@@ -19,6 +20,12 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     public function __construct()
     {
         parent::__construct(new Product());
+    }
+
+    private function asProduct(Model $model): Product
+    {
+        assert($model instanceof Product);
+        return $model;
     }
 
     protected function getCacheTag(): string
@@ -34,21 +41,21 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
         );
     }
 
-    public function create(array $data): \Illuminate\Database\Eloquent\Model
+    public function create(array $data): Product
     {
         $product = $this->model->newQuery()->create($data);
         $this->flushCache();
-        return $product;
+        return $this->asProduct($product);
     }
 
-    public function update(\Illuminate\Database\Eloquent\Model $model, array $data): \Illuminate\Database\Eloquent\Model
+    public function update(Model $model, array $data): Product
     {
         $model->update($data);
         $this->flushCache();
-        return $model->fresh();
+        return $this->asProduct($model->fresh());
     }
 
-    public function delete(\Illuminate\Database\Eloquent\Model $model): void
+    public function delete(Model $model): void
     {
         $model->delete();
         $this->flushCache();
@@ -60,7 +67,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
             $locked = Product::lockForUpdate()->find($product->id);
             $newQty = max(0, $locked->stock_quantity + $delta);
             $locked->update(['stock_quantity' => $newQty]);
-            return $locked->fresh();
+            return $this->asProduct($locked->fresh());
         });
 
         $this->flushCache();
@@ -71,4 +78,5 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         return $this->model->newQuery()->lowStock()->get();
     }
+
 }

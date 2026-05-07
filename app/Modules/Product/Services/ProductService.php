@@ -10,30 +10,46 @@ use App\Modules\Product\DTOs\CreateProductDTO;
 use App\Modules\Product\DTOs\UpdateProductDTO;
 use App\Modules\Product\Events\StockBelowThreshold;
 use App\Modules\Product\Models\Product;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductService extends BaseService implements ProductServiceInterface
 {
-    public function __construct(ProductRepositoryInterface $repository)
+    public function __construct(private readonly ProductRepositoryInterface $productRepository)
     {
-        parent::__construct($repository);
+        parent::__construct($productRepository);
+    }
 
+    private function asProductOrNull(?Model $model): ?Product
+    {
+        assert($model === null || $model instanceof Product);
+        return $model;
+    }
+
+    public function list(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->productRepository->paginate($perPage);
+    }
+
+    public function findById(string $id): ?Product
+    {
+        return $this->asProductOrNull($this->productRepository->findById($id));
     }
 
     public function createFromDTO(CreateProductDTO $dto): Product
     {
-        return $this->repository->create($dto->toArray());
+        return $this->asProductOrNull($this->productRepository->create($dto->toArray()));
     }
 
     public function updateFromDTO(Product $product, UpdateProductDTO $dto): Product
     {
-        return $this->repository->update($product, $dto->toArray());
+        return $this->asProductOrNull($this->productRepository->update($product, $dto->toArray()));
     }
 
     public function adjustStock(Product $product, AdjustStockDTO $dto): Product
     {
-        $repository = $this->repository;
-        $product    = $repository->adjustStock($product, $dto->delta);
+        $product = $this->productRepository->adjustStock($product, $dto->delta);
 
         if ($product->isLowStock()) {
             event(new StockBelowThreshold($product));
@@ -42,9 +58,24 @@ class ProductService extends BaseService implements ProductServiceInterface
         return $product;
     }
 
+    public function delete(Model $model): void
+    {
+        $this->productRepository->delete($model);
+    }
+
+    public function update(Model $model, array $data): Product
+    {
+        return $this->asProductOrNull($this->productRepository->update($model, $data));
+    }
+
+    public function create(array $data): Product
+    {
+        return $this->asProductOrNull($this->productRepository->create($data));
+    }
+
     public function lowStock(): Collection
     {
-        $repository = $this->repository;
-        return $repository->lowStock();
+        return $this->productRepository->lowStock();
     }
+
 }
