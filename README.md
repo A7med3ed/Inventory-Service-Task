@@ -361,6 +361,13 @@ docker compose exec app php artisan l5-swagger:generate
 http://localhost/api/documentation
 ```
 
+## Swagger Json file of Routes (can import in Postman)
+
+```txt
+nhttp://localhost/api/docs
+```
+
+
 ---
 
 # Testing
@@ -409,10 +416,6 @@ docker compose exec app php artisan db:seed --class=ProductSeeder
 docker compose exec app composer require darkaonline/l5-swagger
 ```
 
-```bash
-docker compose exec app composer require zircote/swagger-php
-```
-
 ## Update Composer Packages
 
 ```bash
@@ -427,49 +430,7 @@ docker compose exec app composer dump-autoload
 
 ---
 
-# Useful Docker Commands
 
-## View All Logs
-
-```bash
-docker compose logs
-```
-
-## View App Logs
-
-```bash
-docker compose logs app
-```
-
-## View Database Logs
-
-```bash
-docker compose logs db
-```
-
----
-
-# Vendor Sync From Docker To Local
-
-Useful for fixing VSCode/Intelephense warnings.
-
-```bash
-docker compose cp app:/var/www/html/vendor ./vendor
-```
-
-Or:
-
-```bash
-docker compose cp app:/app/vendor ./vendor
-```
-
-Then run:
-
-```bash
-composer dump-autoload
-```
-
----
 
 # Testing Coverage
 
